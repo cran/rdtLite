@@ -145,6 +145,19 @@
   return(paste(.ddg.path(), "/scripts", sep=""))
 }
 
+#' .ddg.details returns True if collecting provenance for top-level statements
+#' @return True if collecting top-level provenance
+#' @noRd
+
+.ddg.details <- function() {
+  # Set to TRUE if not set
+  if (!.ddg.is.set("ddg.details")) {
+    .ddg.set("ddg.details", TRUE)
+  }
+
+  return(.ddg.get("ddg.details"))
+}
+
 ##### Mutators for specific common actions
 
 #' .ddg.inc increments a ddg counter
@@ -267,4 +280,40 @@
   version <- installed$loadedversion
   installed <- data.frame (package, version)
   return(installed)
+}
+
+#' .ddg.is.null returns true if the variable itself is null.  is.null is a
+#' vectorized function.  This is a non-vectorized version.
+#' @return a single TRUE or FALSE value indicating if the variable is null.
+#' @noRd
+.ddg.is.null <- function (var) {
+  if (length(var) == 0) {
+    if (is.null(var)) {
+      return (TRUE)
+    }  
+  }
+  return (FALSE)
+}
+
+#' .ddg.is.na returns true if the variable itself is NA.  is.na is a vectorized
+#' function.  This is a non-vectorized version of it.
+#' @return a single TRUE or FALSE value indicating if the variable is NA.
+#' @noRd
+.ddg.is.na <- function (var) {
+  if (length(var) == 1) {
+    if (is.na(var)) {
+      return (TRUE)
+    }  
+  }
+  return (FALSE)
+}
+
+
+#' .ddg.is.null.or.na returns true if the variable itself is null or NA.
+#' @return a single TRUE or FALSE value indicating if the variable is null or NA.
+#' @noRd
+.ddg.is.null.or.na <- function (var) {
+  if (.ddg.is.null(var)) return (TRUE)
+  else if (.ddg.is.na(var)) return (TRUE)
+  return (FALSE)
 }

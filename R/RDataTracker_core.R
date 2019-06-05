@@ -26,14 +26,6 @@
 
 #-------- FUNCTIONS TO MANAGE THE GLOBAL VARIABLES--------#
 
-# Global variables cannot be used directly in a library.  Instead,
-# we need to place the variables in our own environment.  These
-# functions make that environment easier to use.
-
-.onLoad <- function(libname, pkgname) {
-  .ddg.init.tables()
-}
-
 ##### Getters for specific variables
 
 #' .ddg.tool.name returns the name of the provenance collection tool.
@@ -1159,6 +1151,48 @@
   #if (typeof(return.value) != "closure") {
   #  print(paste(".ddg.parse.commands: returning ", return.value))
   #}
+}
+
+#' .ddg.evaluate.commands evaluates a list of parsed R statements. Provenance is 
+#' collected for inputs and outputs only. If an error or warning is generated 
+#' when a statement is evaluated, an output exception node is created containing 
+#' the error or warning message.
+
+#' @param exprs list of parsed R statements
+#' @param environ environment in which commands should be executed.
+#' @return nothing
+#' @noRd
+
+.ddg.evaluate.commands <- function (exprs, environ) {
+  for (expr in exprs) {
+    # Evaluate each statement in turn.
+    result <- withCallingHandlers(
+      {
+        return.value <- eval(expr, environ, NULL)
+        .ddg.set ("ddg.error.node.created", FALSE)
+      },
+      warning = .ddg.set.warning,
+      error = function(e)
+        {
+          # If an error occurred, create an error node if not already created.
+          if (!.ddg.get("ddg.error.node.created")) {
+            .ddg.data.node("Exception", "error.msg", toString(e), "ddg.library")
+            .ddg.lastproc2data ("error.msg")
+            .ddg.set ("ddg.error.node.created", TRUE)
+          }
+        }
+    )
+
+    # If a warning occurred, create a warning node.
+    if (.ddg.warning.occurred()) {
+      .ddg.record.warning()
+    }
+
+    # Create nodes & edges for inputs & outputs.
+    .ddg.create.file.read.nodes.and.edges ()
+    .ddg.create.file.write.nodes.and.edges ()
+    .ddg.create.graphics.nodes.and.edges ()
+  }
 }
 
 #' .ddg.push.cmd pushes a command onto the command stack.  The command stack 
