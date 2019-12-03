@@ -1,7 +1,7 @@
 Package: rdtLite
 Title: Provenance Collector
-Version: 1.2
-Date: 2019-09-03
+Version: 1.2.1
+Date: 2019-12-03
 Authors@R: c( person("Barbara", "Lerner", role = c("aut", "cre"),
                       email = "blerner@mtholyoke.edu"),
               person("Emery", "Boose", role = "aut",
@@ -41,12 +41,13 @@ License: GPL-3 | file LICENSE
 URL: https://github.com/End-to-end-provenance/rdtLite
 BugReports: https://github.com/End-to-end-provenance/rdtLite/issues
 Imports: curl, digest, ggplot2, grDevices, gtools, jsonlite, knitr,
-        methods, rmarkdown, sessioninfo, stringi, tools, utils, XML
-Suggests: roxygen2, provSummarizeR, provViz (>= 1.0.6), testthat
+        methods, provSummarizeR, provViz (>= 1.0.6), rmarkdown,
+        sessioninfo, stringi, tools, utils, XML
+Suggests: roxygen2, testthat
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
 NeedsCompilation: no
-Packaged: 2019-09-06 16:47:19 UTC; blerner
+Packaged: 2019-12-03 00:29:10 UTC; blerner
 Author: Barbara Lerner [aut, cre],
   Emery Boose [aut],
   Elizabeth Fong [aut],
@@ -63,4 +64,4 @@ Author: Barbara Lerner [aut, cre],
   Orenna Brand [res]
 Maintainer: Barbara Lerner <blerner@mtholyoke.edu>
 Repository: CRAN
-Date/Publication: 2019-09-07 10:40:02 UTC
+Date/Publication: 2019-12-04 00:20:02 UTC
