@@ -1,3 +1,11 @@
+# rdtLite 1.4
+* Added support for file I/O tracing of functions in the vroom package
+* Save version information of all packages that are loaded when the script finishes
+* Added UI and pandoc fields to the environment information
+
+# rdtLite 1.3.1
+* Fixed minor bugs uncovered by extra checking done in R 4.2.0
+
 # rdtLite 1.3
 * Save the modification time of files that are used by the script in the provenance
 * Save absolute path to the provenance directory in the JSON.

@@ -177,6 +177,7 @@ methods::setMethod ("initialize",
       }
 
       .Object@vars.used <- vars.used
+      #print (paste("vars.used =", vars.used))
 
       .Object@vars.set <- .ddg.find.simple.assign(.Object@parsed[[1]])
       #print ("Initializing DDGStatement, .Object@vars.set")
@@ -281,9 +282,10 @@ methods::setMethod ("initialize",
     # function begins, ends before the enclosing function ends, and matches the 
     # text of the first expression.
     next.parseData <- 
-      which(non.comment.parse.data$line1 >= enclosing.pos@startLine & 
+		which(non.comment.parse.data$line1 >= enclosing.pos@startLine & 
             non.comment.parse.data$line2 <= enclosing.pos@endLine & 
-            non.comment.parse.data$text == paste(deparse(exprs[[1]]), collapse="\n") )[1]
+            gsub("[[:space:]]", "", non.comment.parse.data$text) == 
+            gsub("[[:space:]]", "", paste(deparse(exprs[[1]]), collapse = "\n")) )[1]
   }
   
   # Create the DDGStatements
@@ -302,6 +304,7 @@ methods::setMethod ("initialize",
                                                     parseData, cmdText)
     next.cmd <- next.cmd + 1
     
+
     # If there are more expressions, determine where to look next in the parseData
     if (i < length(exprs)) {
       last.ending.line <- non.comment.parse.data[next.parseData, ]$line2
@@ -312,7 +315,8 @@ methods::setMethod ("initialize",
       # previous expression and starts after the previous expression.
       next.parseData <- which(non.comment.parse.data$parent == last.parent & 
                               non.comment.parse.data$line1 >= last.ending.line & 
-                              non.comment.parse.data$id > last.id) [1]
+                              non.comment.parse.data$id > last.id  ) [1]
+
     }
   }
   
@@ -500,7 +504,7 @@ methods::setMethod ("initialize",
       # Operators also pass the is.name test.  Make sure that if it is a
       # single character, then it is alpha-numeric.
       if (nchar(obj) == 1 && !grepl("[[:alpha:]]", obj)) return (character())
-      # print(paste(".ddg.find.var.uses found name", deparse(obj)))
+      #print(paste(".ddg.find.var.uses found name", deparse(obj)))
       return (deparse(obj))
     }
 
@@ -731,7 +735,7 @@ methods::setMethod ("initialize",
 #' @noRd
 
 .ddg.get.statement.type <- function(parsed.command) {
-  if (length(parsed.command) > 1) return(as.character(parsed.command[[1]]))
+  if (length(parsed.command) > 1) return(as.character(unlist(parsed.command)[1]))
   return("")
 }
 

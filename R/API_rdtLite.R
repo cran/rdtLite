@@ -1,5 +1,6 @@
 # Copyright (C) President and Fellows of Harvard College and 
-# Trustees of Mount Holyoke College, 2014, 2015, 2016, 2017, 2018.
+# Trustees of Mount Holyoke College, 2014, 2015, 2016, 2017, 2018,
+# 2019, 2020, 2021, 2022.
 
 # This program is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -77,6 +78,8 @@
 prov.init <- function(prov.dir = NULL, overwrite = TRUE, snapshot.size = 0, 
   hash.algorithm = "md5", save.debug = FALSE) {
   
+  #print ("In prov.init")
+  
   if (.ddg.is.set("ddg.initialized") && .ddg.get ("ddg.initialized") == TRUE) {
     stop ("Provenance collection is already started.  
           Call prov.quit() to stop the current collection before starting a new one.")
@@ -94,6 +97,7 @@ prov.init <- function(prov.dir = NULL, overwrite = TRUE, snapshot.size = 0,
   
   # If this function was not called from prov.run, save arguments
   if(!.ddg.is.set("ddg.run.args")) {
+    #print ("Saving arguments")
     args.names <- c("overwrite", "snapshot.size", "save.debug")
     args.types <- c("logical", "numeric", "logical")
     
@@ -105,10 +109,14 @@ prov.init <- function(prov.dir = NULL, overwrite = TRUE, snapshot.size = 0,
   }
   
   # Initialize list of input & output file nodes
+  #print ("Initializing file nodes")
   .ddg.init.filenodes ()
 
   # Intialize provenance graph
+  #print ("initializing prov graph")
   .ddg.init(prov.dir, overwrite, save.debug)
+  
+  #print ("prov.init returning")
 }
 
 #' prov.save
@@ -155,6 +163,7 @@ prov.quit <- function(save.debug = FALSE) {
   }
 
   .ddg.quit (save.debug)
+
 }
  
 #' prov.run
@@ -180,12 +189,12 @@ prov.quit <- function(save.debug = FALSE) {
 #' @examples 
 #' \dontrun{prov.run ("script.R")}
 #' \dontrun{prov.source ("script.R")}
-#' prov.init()
-#' a <- 1
-#' b <- 2
-#' prov.save()
-#' ab <- a + b
-#' prov.quit()
+#' \donttest{prov.init()}
+#' \donttest{a <- 1}
+#' \donttest{b <- 2}
+#' \donttest{prov.save()}
+#' \donttest{ab <- a + b}
+#' \donttest{prov.quit()}
 
 prov.run <- function(r.script.path, prov.dir = NULL, overwrite = TRUE, details = TRUE, 
   snapshot.size = 0, hash.algorithm = "md5", save.debug = FALSE, exprs, ...) {
@@ -307,14 +316,14 @@ prov.source <- function(file, exprs, ...) {
 #' @references PROV-JSON output produced by rdtLite: \url{https://github.com/End-to-end-provenance/ExtendedProvJson/blob/master/JSON-format.md}
 #' @references Applications that use the provenance:  \url{https://github.com/End-to-end-provenance/End-to-end-provenance.github.io/blob/master/RTools.md}
 #' @examples
-#' prov.init()
-#' a <- 1
-#' b <- 2
-#' ab <- a + b
-#' prov.quit()
-#' str <- prov.json()
-#' pdir <- prov.dir()
-#' \dontrun{prov.visualize()} 
+#' \donttest{prov.init()}
+#' \donttest{a <- 1}
+#' \donttest{b <- 2}
+#' \donttest{ab <- a + b}
+#' \donttest{prov.quit()}
+#' \donttest{str <- prov.json()}
+#' \donttest{pdir <- prov.dir()}
+
 
 prov.json <- function() {
   # This is a wrapper function.
@@ -366,12 +375,23 @@ prov.visualize <- function () {
 #' provenance directory
 #' @param create.zip if true all of the provenance data will be packaged up
 #'   into a zip file stored in the current working directory.
+#' @param details if true, a more detailed summary is provided
+#' @param check	if true, the user's file system is checked to see if input 
+#'   files, output files, and scripts (in their original locations) are unchanged, 
+#'   changed, or missing.
+#' @param console if true, the summary is displayed in the console
+#' @param notes if true, notes are included to explain how to interpret the summary
 #' 
 #' @export
 #' @rdname prov.json
 
-prov.summarize <- function (save=FALSE, create.zip=FALSE) {
-  provSummarizeR::prov.summarize(save, create.zip)
+prov.summarize <- function (save=FALSE, create.zip=FALSE, details=FALSE, check=TRUE, console=TRUE, notes=TRUE) {
+  if (requireNamespace ("provSummarizeR", quietly=TRUE)) {
+  	provSummarizeR::prov.summarize(save=save, create.zip=create.zip, details=details, check=check, console=console, notes=notes)
+  }
+  else {
+  	cat ("You need to install the provSummarizeR package to use this function.")
+  }
   invisible()
 }
 

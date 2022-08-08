@@ -155,7 +155,7 @@
 #' @noRd
 
 .ddg.warning.occurred <- function() {
-  return (.ddg.is.set("ddg.warning") && !is.na(.ddg.get("ddg.warning")))
+  return (.ddg.is.set("ddg.warning") && any(!is.na(.ddg.get("ddg.warning"))))
 }
 
 
@@ -426,6 +426,7 @@
     else {
       scope <- .ddg.get.scope(var, for.caller)
       if (.ddg.data.node.exists(var, scope)) {
+        #print ("Found data node in caller's scope")
         .ddg.data2proc(var, scope, cmd@abbrev)
       }
     }
@@ -441,6 +442,7 @@
       else {
         scope <- .ddg.get.scope(var.env, for.caller)
         if (.ddg.data.node.exists(var.env, scope)) {
+          #print ("Found data node inside environment")
           .ddg.data2proc(var.env, scope, cmd@abbrev)
         }
       }
@@ -573,7 +575,7 @@
     #print(paste(".ddg.create.data.set.edges.for.cmd: var = ", var))
     
     # Check for a new ggplot that was not assigned to a variable
-    if ("ggplot2" %in% .ddg.get("ddg.installed.package.names") && .ddg.get ("ddg.ggplot.created")) {
+    if (isNamespaceLoaded("ggplot2") && .ddg.get ("ddg.ggplot.created")) {
       if (var == "") {      
         # Add a data node for the plot and link it in.
         # Set ddg.last.ggplot to the name of this node
@@ -1008,7 +1010,7 @@
   }
   num.cmds <- length(cmds)
 
-  # print (paste("ddg.parse.commands: ddg.func.depth =", .ddg.get("ddg.func.depth")))
+  #print (paste("ddg.parse.commands: ddg.func.depth =", .ddg.get("ddg.func.depth")))
   inside.func <- (.ddg.get("ddg.func.depth") > 0)
 
   if (!inside.func) {
@@ -1161,7 +1163,8 @@
                   #             paste(annot, collapse = " ")))
                   # Don't set return.value if we are calling a ddg function or we 
                   # are executing an if-statement
-                  if (grepl("^ddg|^.ddg|^prov", annot) 
+                  loaded_before = loadedNamespaces()
+                  if (grepl("^ddg|^.ddg|^prov", cmd@text) 
                     || .ddg.get.statement.type(annot) == "if") {
                       captured.output <- .ddg.capture.output (returnWithVisible <- withVisible (eval(annot, environ, NULL)))
                       .ddg.set ("ddg.error.node.created", FALSE)
@@ -1175,6 +1178,12 @@
                     #}
                     .ddg.set ("ddg.last.R.value", returnWithVisible$value)
                     .ddg.set ("ddg.error.node.created", FALSE)
+                  }
+                  loaded_after = loadedNamespaces()
+                  if (length(loaded_before) != length(loaded_after)) {
+                  	script.libraries <- .ddg.get ("ddg.script.libraries")
+                  	script.libraries <- append (script.libraries, setdiff(loaded_after, loaded_before))
+                  	.ddg.set("ddg.script.libraries", script.libraries)
                   }
                   
                   #### Start code taken from R's source function. ####
@@ -1795,7 +1804,7 @@
   if (is.null(env)) {
     env <- .ddg.get.env(name, for.caller, calls)
   }
-
+  
   # If no environment found, name does not exist, so scope is
   # undefined.
   if (is.null(env)) return ("undefined")
@@ -1823,7 +1832,7 @@
   
   # save library information to file
   fileout <- paste(.ddg.path.debug(), "/libraries.csv", sep="")
-  utils::write.csv(.ddg.installedpackages(), fileout, row.names=FALSE)
+  utils::write.csv(.ddg.loadedpackages(), fileout, row.names=FALSE)
   
   # save execution environment information to file
   fileout <- paste(.ddg.path.debug(), "/environment.csv", sep="")
